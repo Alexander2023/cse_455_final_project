@@ -11,6 +11,7 @@ BATCH_SIZE = 32
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 WEIGHT_DECAY = 0.001
+EPOCHS = 3
 CLASSES = 7
 PRETRAINED_WEIGHTS = models.ResNet18_Weights.DEFAULT
 MODEL_FORMAT_TRANSFORMS_LIST = [transforms.Lambda(convert_grayscale_to_rgb),
@@ -37,22 +38,24 @@ def train_model(available_device: device, model, training_loader: DataLoader, lo
       weight_decay=WEIGHT_DECAY)
   num_total = 0
   num_correct = 0
-  for _, (input_data, input_labels) in enumerate(training_loader):
-    input_data = input_data.to(available_device)
-    input_labels = input_labels.to(available_device)
+  for i in range(EPOCHS):
+    print(f"Epoch #{i}")
+    for _, (input_data, input_labels) in enumerate(training_loader):
+      input_data = input_data.to(available_device)
+      input_labels = input_labels.to(available_device)
 
-    optimizer.zero_grad()
-    predictions = model(input_data)
-    loss = loss_function(predictions, input_labels)
-    loss.backward()
-    optimizer.step()
+      optimizer.zero_grad()
+      predictions = model(input_data)
+      loss = loss_function(predictions, input_labels)
+      loss.backward()
+      optimizer.step()
 
-    print("Loss = ", loss.item())
+      print("Loss = ", loss.item())
 
-    num_total += BATCH_SIZE
-    num_correct += compute_correct_predictions(predictions, input_labels)
+      num_total += BATCH_SIZE
+      num_correct += compute_correct_predictions(predictions, input_labels)
 
-  print("Training Accuracy = ", num_correct / num_total)
+    print("Training Accuracy = ", num_correct / num_total)
 
 def testing_model(available_device: device, model, testing_loader: DataLoader, loss_function):
   model.eval()
