@@ -12,7 +12,7 @@ def random_horizontal_flip(img: Image.Image, prob_flip: float):
     data = img.load()
 
     for h in range(height):
-        for w in range(width):
+        for w in range(int(width / 2.0)):
             data[w, h], data[width - 1 - w, h] = data[width - 1 - w, h], data[w, h]
 
     return img
