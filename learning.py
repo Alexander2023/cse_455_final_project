@@ -1,16 +1,20 @@
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
-from torch import nn, optim, no_grad, device, cuda
+from torch import nn, optim, no_grad, device, cuda, save
 
 from custom_transforms import convert_grayscale_to_rgb
 
 DATA_PATH = "." # update to path of directory containing fer2013 folder, as needed
+SAVED_WEIGHTS_PATH = "./saved_weights.pt"
 BATCH_SIZE = 32
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 WEIGHT_DECAY = 0.001
 CLASSES = 7
+PRETRAINED_WEIGHTS = models.ResNet18_Weights.DEFAULT
+MODEL_FORMAT_TRANSFORMS_LIST = [transforms.Lambda(convert_grayscale_to_rgb),
+                                PRETRAINED_WEIGHTS.transforms()]
 
 def compute_correct_predictions(predictions, input_labels):
   # used from reference
@@ -18,12 +22,11 @@ def compute_correct_predictions(predictions, input_labels):
   _, predicted = torch.max(predictions.data, 1)
   return (predicted == input_labels).sum().item()
 
-def prepare_loaders(pretrained_weights: models.Weights):
-  transformations = transforms.Compose([transforms.Lambda(convert_grayscale_to_rgb),
-                                        pretrained_weights.transforms()])
+def prepare_loaders():
+  transform = transforms.Compose(MODEL_FORMAT_TRANSFORMS_LIST)
 
-  training_data = datasets.FER2013(DATA_PATH, "train", transformations)
-  testing_data = datasets.FER2013(DATA_PATH, "test", transformations)
+  training_data = datasets.FER2013(DATA_PATH, "train", transform)
+  testing_data = datasets.FER2013(DATA_PATH, "test", transform)
 
   return DataLoader(training_data, BATCH_SIZE, True), DataLoader(testing_data,
       BATCH_SIZE, True)
@@ -70,21 +73,25 @@ def testing_model(available_device: device, model, testing_loader: DataLoader, l
 
   print("Testing Accuracy = ", num_correct / num_total)
 
-available_device = device("cuda") if cuda.is_available() else device("cpu")
-pretrained_weights = models.ResNet18_Weights.DEFAULT
-model = models.resnet18(weights=pretrained_weights)
-model.fc = nn.Linear(model.fc.in_features, CLASSES)
-model.to(available_device)
-loss_function = nn.CrossEntropyLoss()
+def main():
+  available_device = device("cuda") if cuda.is_available() else device("cpu")
+  model = models.resnet18(weights=PRETRAINED_WEIGHTS)
+  model.fc = nn.Linear(model.fc.in_features, CLASSES)
+  model.to(available_device)
+  loss_function = nn.CrossEntropyLoss()
 
-print("Begin loading data")
-training_loader, testing_loader = prepare_loaders(pretrained_weights)
-print("Loading data completed")
+  print("Begin loading data")
+  training_loader, testing_loader = prepare_loaders()
+  print("Loading data completed")
 
-print("Begin training model")
-train_model(available_device, model, training_loader, loss_function)
-print("Training model completed")
+  print("Begin training model")
+  train_model(available_device, model, training_loader, loss_function)
+  save(model.state_dict(), SAVED_WEIGHTS_PATH)
+  print("Training model completed")
 
-print("Begin testing model")
-testing_model(available_device, model, testing_loader, loss_function)
-print("Testing model completed")
+  print("Begin testing model")
+  testing_model(available_device, model, testing_loader, loss_function)
+  print("Testing model completed")
+
+if __name__ == "__main__":
+  main()

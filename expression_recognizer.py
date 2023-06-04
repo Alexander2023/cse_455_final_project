@@ -1,26 +1,44 @@
-from cv2 import VideoCapture, imshow, waitKey, putText, FONT_HERSHEY_SIMPLEX, cvtColor, COLOR_BGR2RGB
+import torch
+from cv2 import VideoCapture, imshow, waitKey, putText, FONT_HERSHEY_SIMPLEX, cvtColor, COLOR_BGR2RGB, COLOR_BGR2GRAY
 from PIL import Image
-from random import randint
+from torchvision import models, transforms
+from torch import load, no_grad, nn, argmax, unsqueeze, device
+
+from learning import SAVED_WEIGHTS_PATH, CLASSES, MODEL_FORMAT_TRANSFORMS_LIST
 
 HAPPY_LABEL = "happy"
-INFERENCE_RATE = 10
-
-labels = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
+INFERENCE_RATE = 5
+LABELS = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
 
 def load_model():
-    pass
+    model = models.resnet18()
+    model.fc = nn.Linear(model.fc.in_features, CLASSES)
+    state_dict = load(SAVED_WEIGHTS_PATH, device("cpu"))
+    model.load_state_dict(state_dict)
+    return model
 
-def generate_expression_label(video_frame):
-    index = randint(0, 6)
-    return labels[index]
+def generate_expression_label(video_frame, model_format_transform):
+    # matches color space during training
+    video_frame = cvtColor(video_frame, COLOR_BGR2GRAY)
+
+    image = Image.fromarray(video_frame)
+
+    with no_grad():
+      image = model_format_transform(image)
+      image = unsqueeze(image, 0) # needed since batch size is 1
+      prediction = model(image)
+      label_index = argmax(prediction).item()
+      return LABELS[label_index]
 
 def save_happy_image(video_frame):
     video_frame = cvtColor(video_frame, COLOR_BGR2RGB)
     image = Image.fromarray(video_frame)
     image.save("happy_image.jpg")
 
+model_format_transform = transforms.Compose(MODEL_FORMAT_TRANSFORMS_LIST)
 camera_feed = VideoCapture(0)
-load_model()
+model = load_model()
+model.eval()
 
 i = 0
 current_label = ""
@@ -30,7 +48,7 @@ try:
 
         if has_received_frame:
             if i % INFERENCE_RATE == 0:
-                current_label = generate_expression_label(video_frame)
+                current_label = generate_expression_label(video_frame, model_format_transform)
                 i = 0
 
             putText(video_frame, current_label, (50, 50), FONT_HERSHEY_SIMPLEX,
