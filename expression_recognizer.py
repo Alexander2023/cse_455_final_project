@@ -4,7 +4,7 @@ from PIL import Image
 from torchvision import models, transforms
 from torch import load, no_grad, nn, argmax, unsqueeze, device
 
-from learning import SAVED_WEIGHTS_PATH, CLASSES, MODEL_FORMAT_TRANSFORMS_LIST
+from learning import SAVED_WEIGHTS_PATH, CLASSES, MODEL_FORMAT_TRANSFORMS
 
 HAPPY_LABEL = "happy"
 INFERENCE_RATE = 5
@@ -35,7 +35,7 @@ def save_happy_image(video_frame):
     image = Image.fromarray(video_frame)
     image.save("happy_image.jpg")
 
-model_format_transform = transforms.Compose(MODEL_FORMAT_TRANSFORMS_LIST)
+model_format_transform = transforms.Compose(MODEL_FORMAT_TRANSFORMS)
 camera_feed = VideoCapture(0)
 model = load_model()
 model.eval()
