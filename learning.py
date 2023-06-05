@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
 from torch import nn, optim, no_grad, device, cuda, save
 
-from custom_transforms import convert_grayscale_to_rgb
+from custom_transforms import convert_grayscale_to_rgb, random_horizontal_flip, random_rotation
 
 DATA_PATH = "." # update to path of directory containing fer2013 folder, as needed
 SAVED_WEIGHTS_PATH = "./saved_weights.pt"
@@ -24,7 +24,9 @@ def compute_correct_predictions(predictions, input_labels):
   return (predicted == input_labels).sum().item()
 
 def prepare_loaders():
-  transform = transforms.Compose(MODEL_FORMAT_TRANSFORMS_LIST)
+  transform = transforms.Compose([transforms.Lambda(random_horizontal_flip),
+                                  transforms.Lambda(random_rotation),
+                                  *MODEL_FORMAT_TRANSFORMS_LIST])
 
   training_data = datasets.FER2013(DATA_PATH, "train", transform)
   testing_data = datasets.FER2013(DATA_PATH, "test", transform)
