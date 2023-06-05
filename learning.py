@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms, models
 from torch import nn, optim, no_grad, device, cuda, save
 
@@ -29,7 +29,10 @@ def prepare_loaders():
                                   *MODEL_FORMAT_TRANSFORMS_LIST])
 
   training_data = datasets.FER2013(DATA_PATH, "train", transform)
-  testing_data = datasets.FER2013(DATA_PATH, "test", transform)
+  # using training for both train/test since Kaggle test set is unlabeled
+  data_split = random_split(training_data, [0.8, 0.2])
+  training_data = data_split[0]
+  testing_data = data_split[1]
 
   return DataLoader(training_data, BATCH_SIZE, True), DataLoader(testing_data,
       BATCH_SIZE, True)
