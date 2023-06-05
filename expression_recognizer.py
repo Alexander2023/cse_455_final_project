@@ -42,6 +42,7 @@ model.eval()
 
 i = 0
 current_label = ""
+is_already_happy = False
 try:
     while True:
         has_received_frame, video_frame = camera_feed.read()
@@ -56,8 +57,11 @@ try:
             imshow('video_frame', video_frame)
             waitKey(25)
 
-            if current_label == HAPPY_LABEL:
+            if current_label == HAPPY_LABEL and not is_already_happy:
                 save_happy_image(video_frame)
+                is_already_happy = True
+            elif current_label != HAPPY_LABEL:
+                is_already_happy = False
 
         i += 1
 finally:
