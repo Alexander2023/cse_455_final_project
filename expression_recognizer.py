@@ -20,7 +20,6 @@ def load_model():
 def generate_expression_label(video_frame, model_format_transform):
     # matches color space during training
     video_frame = cvtColor(video_frame, COLOR_BGR2GRAY)
-
     image = Image.fromarray(video_frame)
 
     with no_grad():

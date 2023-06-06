@@ -33,10 +33,7 @@ def prepare_loaders():
   training_data = datasets.FER2013(DATA_PATH, "train", transform)
   # using training for both train/test since Kaggle test set is unlabeled
   data_split = random_split(training_data, [0.8, 0.2])
-  training_data = data_split[0]
-  testing_data = data_split[1]
-
-  return DataLoader(training_data, BATCH_SIZE, True), DataLoader(testing_data,
+  return DataLoader(data_split[0], BATCH_SIZE, True), DataLoader(data_split[1],
       BATCH_SIZE, True)
 
 def get_k_data():
@@ -53,7 +50,6 @@ def prepare_k_loaders(k_data, testing_idx):
   for i, dataset in enumerate(k_split):
     if i != testing_idx:
       k_minus_1_training_indices.extend(dataset.indices)
-
   return (DataLoader(Subset(training_data, k_minus_1_training_indices), BATCH_SIZE, True),
           DataLoader(k_split[testing_idx], BATCH_SIZE, True))
 
@@ -70,6 +66,8 @@ def train_model(available_device: device, model, training_loader: DataLoader, lo
       input_data = input_data.to(available_device)
       input_labels = input_labels.to(available_device)
 
+      # training steps used from reference, with slight modification
+      # https://pytorch.org/tutorials/beginner/introyt/trainingyt.html
       optimizer.zero_grad()
       predictions = model(input_data)
       loss = loss_function(predictions, input_labels)
