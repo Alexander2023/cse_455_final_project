@@ -58,10 +58,10 @@ def train_model(available_device: device, model, training_loader: DataLoader, lo
   model.train()
   optimizer = optim.SGD(model.parameters(), LEARNING_RATE, MOMENTUM,
       weight_decay=WEIGHT_DECAY)
-  num_total = 0
-  num_correct = 0
   for i in range(EPOCHS):
     print(f"Epoch #{i}")
+    num_total = 0
+    num_correct = 0
     for _, (input_data, input_labels) in enumerate(training_loader):
       input_data = input_data.to(available_device)
       input_labels = input_labels.to(available_device)
