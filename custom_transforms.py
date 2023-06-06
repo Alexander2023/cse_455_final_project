@@ -33,8 +33,12 @@ def rotate(coords, three_shear_rotation):
         rotated_coords[1][0] = round(rotated_coords[1][0])
     return rotated_coords
 
-def random_rotation(img: Image.Image, lower_theta_bound: float = -0.349066,
+def random_rotation(img: Image.Image, prob_rotate: float = 0.2,
+                    lower_theta_bound: float = -0.349066,
                     upper_theta_bound: float = 0.349066):
+    if random() > prob_rotate:
+        return img
+
     width, height = img.size
     data = img.load()
     rotated_img = Image.new("L", (width, height))
