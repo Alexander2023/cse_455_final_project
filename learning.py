@@ -6,20 +6,20 @@ from torch import nn, optim, no_grad, device, cuda, save, Generator
 from custom_transforms import convert_grayscale_to_rgb, random_horizontal_flip, random_rotation
 
 DATA_PATH = "." # update to path of directory containing fer2013 folder, as needed
-SAVED_WEIGHTS_PATH = "./saved_weights.pt"
-BATCH_SIZE = 32
+SAVED_WEIGHTS_PATH = "./final_weights.pt"
+BATCH_SIZE = 64
 LEARNING_RATE = 0.01
 MOMENTUM = 0.9
 WEIGHT_DECAY = 0.001
-EPOCHS = 3
+EPOCHS = 4
 CLASSES = 7
-PRETRAINED_WEIGHTS = models.ResNet18_Weights.DEFAULT
+PRETRAINED_WEIGHTS = models.ResNet34_Weights.DEFAULT
 MODEL_FORMAT_TRANSFORMS = [transforms.Lambda(convert_grayscale_to_rgb),
                            PRETRAINED_WEIGHTS.transforms()]
 MODEL_FORMAT_TRANSFORMS_WITH_AUGMENTATION = [transforms.Lambda(random_horizontal_flip),
                                              transforms.Lambda(random_rotation),
                                              *MODEL_FORMAT_TRANSFORMS]
-K_FOLDS = 2
+K_FOLDS = 5
 USE_K_FOLDS = True # when False, holdout is used
 
 def compute_correct_predictions(predictions, input_labels):
@@ -110,7 +110,7 @@ def main():
   loss_function = nn.CrossEntropyLoss()
 
   def prepare_model():
-    model = models.resnet18(weights=PRETRAINED_WEIGHTS)
+    model = models.resnet34(weights=PRETRAINED_WEIGHTS)
     model.fc = nn.Linear(model.fc.in_features, CLASSES)
     model.to(available_device)
     return model

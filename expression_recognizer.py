@@ -11,7 +11,7 @@ INFERENCE_RATE = 5
 LABELS = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
 
 def load_model():
-    model = models.resnet18()
+    model = models.resnet34()
     model.fc = nn.Linear(model.fc.in_features, CLASSES)
     state_dict = load(SAVED_WEIGHTS_PATH, device("cpu"))
     model.load_state_dict(state_dict)
