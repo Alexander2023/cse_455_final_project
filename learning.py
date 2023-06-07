@@ -20,10 +20,10 @@ MODEL_FORMAT_TRANSFORMS_WITH_AUGMENTATION = [transforms.Lambda(random_horizontal
                                              transforms.Lambda(random_rotation),
                                              *MODEL_FORMAT_TRANSFORMS]
 K_FOLDS = 5
-USE_K_FOLDS = True # when False, holdout is used
+USE_K_FOLDS = True # when False, Hold-Out method is used
 
 def compute_correct_predictions(predictions, input_labels):
-  # used from reference
+  # used from reference, with slight modification
   # https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
   _, predicted = torch.max(predictions.data, 1)
   return (predicted == input_labels).sum().item()
