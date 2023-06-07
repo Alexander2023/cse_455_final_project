@@ -14,7 +14,7 @@ Implemented For Project:
 -
 * Random horizontal flip
 * Random rotation using Three Shear Rotation algorithm (described here http://datagenetics.com/blog/august32013/index.html)
-* K-Fold Cross-Validation algorithm (described here https://neptune.ai/blog/cross-validation-in-machine-learning-how-to-do-it-right)
+* K-Fold Cross-Validation procedure (described here https://neptune.ai/blog/cross-validation-in-machine-learning-how-to-do-it-right)
 * Remaining parts of learning process
 * Mini-app for expression recognition and image capture
 
